@@ -60,9 +60,9 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@fancyapps/ui": "^4.0.26",
-    "jquery": "^3.6.0",
-    "swiper": "^8.1.4",
+    "dat.gui": "^0.7.9",
+    "gsap": "^3.11.4",
+    "three": "^0.148.0",
     "vanilla-lazyload": "^17.8.1",
     "vue": "^3.2.33"
   }

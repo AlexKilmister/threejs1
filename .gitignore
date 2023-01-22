@@ -6,7 +6,7 @@
 # Node
 node_modules
 
-# Dist & test
+# Dist & hxgn
 test
 dist
 
