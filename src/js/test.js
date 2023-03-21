@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import {gsap} from "gsap/all"
 import * as dat from "dat.gui/src/dat";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls"
 
@@ -183,5 +182,8 @@ function init() {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-	init()
+	const cn = document.querySelector('#canvas-test')
+	if(cn) {
+		init()
+	}
 })

@@ -6,4 +6,3 @@ import * as THREE from 'three'
 const lazyLoad = new LazyLoad({
 	elements_selector: '.js-lazy'
 })
-
