@@ -14,6 +14,8 @@ import './js/hxgn'
 import './js/test'
 import './js/test2'
 import './js/test3'
+import './js/earth'
+import './js/human'
 
 document.addEventListener('DOMContentLoaded', () => {
 

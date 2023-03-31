@@ -180,7 +180,7 @@ function init() {
 	const tick = () => {
 		const elapsedTime = clock.getElapsedTime()
 
-		// sphere.rotation.y = 0.1 * elapsedTime
+		sphere.rotation.y = 0.1 * elapsedTime
 		// plane.rotation.y = 0.1 * elapsedTime
 		// torus.rotation.y = 0.1 * elapsedTime
 		//

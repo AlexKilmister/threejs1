@@ -143,7 +143,7 @@ const baseWebpackConfig = {
       }
     }),
     new CssUrlRelativePlugin(),
-    new ImageminWebpWebpackPlugin(),
+    //new ImageminWebpWebpackPlugin(),
 
     // Automatic creation any html pages (Don't forget to RERUN dev server)
     ...PAGES.map(page => {
