@@ -57,17 +57,17 @@ function init() {
 			object.scale.set(0.005, 0.005, 0.005)
 			object.position.set(-2.5, -1.6, 2)
 			object.rotation.set(-Math.PI * 0.5, 0, 0)
-			// tds.traverse( function ( child ) {
-			// 	console.log(child);
-			//
-			// 	if ( child.isMesh ) {
-			//
-			// 		child.material.specular.setScalar( 0.1 );
-			// 		//child.material.normalMap = normal;
-			//
-			// 	}
-			//
-			// } );
+			object.traverse(function(child) {
+				console.log(child)
+
+				if ( child.isMesh ) {
+
+					child.material.specular.setScalar( 0.1 );
+					//child.material.normalMap = normal;
+
+				}
+
+			} );
 
 			scene.add(object)
 		})

@@ -2,8 +2,13 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import {TDSLoader} from 'three/examples/jsm/loaders/TDSLoader.js'
 import {FBXLoader} from 'three/examples/jsm/loaders/FBXLoader.js'
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import * as dat from "dat.gui/src/dat";
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
+
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import * as dat from "dat.gui/src/dat"
+
+import { gsap, ScrollTrigger } from "gsap/all"
+gsap.registerPlugin(ScrollTrigger)
 
 function init() {
 
@@ -11,20 +16,67 @@ function init() {
 	const canvas = document.querySelector('canvas.webgl')
 	const scene = new THREE.Scene()
 	const gui = new dat.GUI()
+	let mouseX = 0
+	let mouseY = 0
+	let windowHalfX = window.innerWidth / 2
+	let windowHalfY = window.innerHeight / 2
+	let floatY = -1.6
 	/**
 	 * Ground
 	 */
-	const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) );
-	mesh.rotation.x = - Math.PI / 2;
-	mesh.receiveShadow = true;
-	scene.add( mesh );
+
+	function onDocumentMouseMove(event) {
+		mouseX = (event.clientX - windowHalfX) / 360;
+		mouseY = (event.clientY - windowHalfY) / 360;
+	}
+
+	function wrapAndRepeatTexture (map) {
+		map.wrapS = map.wrapT = THREE.RepeatWrapping
+		map.repeat.x = map.repeat.y = 10
+	}
+
+	// const textureLoader = new THREE.TextureLoader();
+	// const placeholder = textureLoader.load("./textures/placeholder/placeholder.png");
+	// const sandBaseColor = textureLoader.load("./textures/sand/Sand 002_COLOR.jpg");
+	// const sandNormalMap = textureLoader.load("./textures/sand/Sand 002_NRM.jpg");
+	// const sandHeightMap = textureLoader.load("./textures/sand/Sand 002_DISP.jpg");
+	// const sandAmbientOcclusion = textureLoader.load("./textures/sand/Sand 002_OCC.jpg");
+	//
+	// const WIDTH = 80
+	// const LENGTH = 80
+	//
+	// const geometry = new THREE.PlaneGeometry(WIDTH, LENGTH, 512, 512);
+	// const material = new THREE.MeshStandardMaterial(
+	// 	{
+	// 		map: sandBaseColor, normalMap: sandNormalMap,
+	// 		displacementMap: sandHeightMap, displacementScale: 0.1,
+	// 		aoMap: sandAmbientOcclusion
+	// 	})
+	// wrapAndRepeatTexture(material.map)
+	// wrapAndRepeatTexture(material.normalMap)
+	// wrapAndRepeatTexture(material.displacementMap)
+	// wrapAndRepeatTexture(material.aoMap)
+	// // const material = new THREE.MeshPhongMaterial({ map: placeholder})
+	//
+	// const floor = new THREE.Mesh(geometry, material)
+	// floor.receiveShadow = true
+	// floor.rotation.x = - Math.PI / 2
+	// scene.add(floor)
+
+	const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100 ), new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: false } ) )
+	mesh.rotation.x = - Math.PI / 2
+	mesh.receiveShadow = true
+	scene.add( mesh )
+	mesh.position.set(0, floatY, 0)
 
 	/**
 	 * Lights
 	 */
+
 	const hemiLight = new THREE.HemisphereLight( 0xffffff, 0x444444 );
 	hemiLight.position.set( 0, 20, 0 );
 	scene.add( hemiLight );
+
 
 	const dirLight = new THREE.DirectionalLight( 0xffffff );
 	dirLight.position.set( - 3, 10, - 10 );
@@ -35,74 +87,34 @@ function init() {
 	dirLight.shadow.camera.right = 2;
 	dirLight.shadow.camera.near = 0.1;
 	dirLight.shadow.camera.far = 40;
-	gui.add(dirLight, 'intensity').min(0).max(1).step(0.001)
-	gui.add(dirLight.position, 'x').min(- 10).max(10).step(0.001)
-	gui.add(dirLight.position, 'y').min(- 10).max(10).step(0.001)
-	gui.add(dirLight.position, 'z').min(- 10).max(10).step(0.001)
-	scene.add(dirLight);
+	scene.add( dirLight );
 
-	const directionalLightCameraHelper = new THREE.CameraHelper(dirLight.shadow.camera)
-	directionalLightCameraHelper.visible = false
-	scene.add(directionalLightCameraHelper)
-
-
-
-//3ds files dont store normal maps
-// 	const loaderTDS = new TDSLoader()
-// 	loaderTDS.load(
-// 		'./textures/Geothermal Steam Factory_no_sparks.3ds',
-// 		function ( object ) {
-// 			console.log(object);
-// 			// object.scale.set(0.005, 0.005, 0.005)
-// 			// object.position.set(-2.5, -1.6, 2)
-// 			// object.rotation.set(-Math.PI * 0.5, 0, 0)
-// 			// tds.traverse( function ( child ) {
-// 			// 	console.log(child);
-// 			//
-// 			// 	if ( child.isMesh ) {
-// 			//
-// 			// 		child.material.specular.setScalar( 0.1 );
-// 			// 		//child.material.normalMap = normal;
-// 			//
-// 			// 	}
-// 			//
-// 			// } );
-//
-// 			scene.add(object)
-// 		})
 	let mixer = null
 
-	const loaderFBX = new FBXLoader()
-	loaderFBX.load(
-		'./textures/Strut Walking (1).fbx',
-		( object ) => {
-			console.log(object);
-			object.scale.set(0.01, 0.01, 0.01)
-			object.position.set(0, -1, 0)
-			object.rotation.set(0, 0, 0)
-			object.traverse((child) => {
-				//console.log(child);
-				child.castShadow = true
+	const loaderGLTF = new GLTFLoader()
+	let model = null
+	loaderGLTF.load(
+		'./textures/Soldier.glb',
+		( glft ) => {
+			model = glft.scene
+			model.traverse(function (object) {
+				if (object.isMesh) object.castShadow = true
+			})
+			scene.add(model)
+			//model.scale.set(1, 1, 1)
+			model.position.set(0, floatY, 0)
+			//model.rotation.set(0, -Math.PI * 0.5, 0)
 
-			} );
-			// const model = object
-			// scene.add( model );
+
+
+			mixer = new THREE.AnimationMixer(model)
+			if(glft.animations.length && glft.animations[3]) {
+				const action = mixer.clipAction(glft.animations[3])
+				action.play()
+			}
 			//
-			// model.traverse( function ( object ) {
+			// console.log(object.animations[0]);
 			//
-			// 	if ( object.isMesh ) object.castShadow = true;
-			//
-			// } );
-
-
-
-			mixer = new THREE.AnimationMixer(object)
-			const action = mixer.clipAction(object.animations[0])
-			action.play()
-
-			console.log(object.animations[0]);
-
-			scene.add(object)
 		})
 
 
@@ -126,63 +138,111 @@ function init() {
 		camera.updateProjectionMatrix()
 
 		// Update renderer
-		renderer.setSize(sizes.width, sizes.height)
-		renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+		renderer.setSize(sizes.width, sizes.height);
+		renderer.setPixelRatio(window.devicePixelRatio);
 	})
+
+	window.addEventListener('mousemove', onDocumentMouseMove, false);
 
 	/**
 	 * Camera
 	 */
 // Base camera
-	const camera = new THREE.PerspectiveCamera( 45, sizes.width / sizes.height, 1, 1000 )
-	camera.position.set( 1, 2, 2 )
-	camera.lookAt( 0, 1, 0 )
-	const cameraPosition = gui.addFolder('Camera position')
-	cameraPosition.add(camera.position, 'x').min(-10).max(10).step(1)
-	cameraPosition.add(camera.position, 'y').min(-10).max(10).step(1)
-	cameraPosition.add(camera.position, 'z').min(-10).max(10).step(1)
-	scene.add(camera)
+	const camera = new THREE.PerspectiveCamera( 45, sizes.width / sizes.height, 0.1, 1000 )
+	// const camera = new THREE.OrthographicCamera( sizes.width / - 2, sizes.width / 2, sizes.height / 2, sizes.height / - 2, 1, 1000 );
+	scene.add( camera )
+	camera.position.set( 0, 1, -3 )
+	//camera.lookAt( 0, 1, 2 )
+
+	// const cameraPosition = gui.addFolder('Camera position')
+	// cameraPosition.add(camera.position, 'x').min(-30).max(30).step(0.01)
+	// cameraPosition.add(camera.position, 'y').min(-30).max(30).step(0.01)
+	// cameraPosition.add(camera.position, 'z').min(-30).max(30).step(0.01)
+	// scene.add(camera)
 
 	scene.background = new THREE.Color( 0xa0a0a0 )
 	scene.fog = new THREE.Fog( 0xa0a0a0, 10, 50 )
 
+	// ScrollTrigger.create({
+	// 	trigger: '#target',
+	// 	start: 'top bottom',
+	// 	scrub: true,
+	// 	//markers: true,
+	// 	invalidateOnRefresh: true,
+	// 	onUpdate: () => {
+	//
+	// 	}
+	// })
+
+	ScrollTrigger.defaults({
+		immediateRender: false,
+		ease: "power1.inOut"
+	});
+	// ScrollTrigger.defaults({});
+	let anim_tl = gsap.timeline({
+		scrollTrigger: {
+			trigger: '#target',
+			start: "top top",
+			end: "bottom bottom",
+			markers: true,
+			scrub: true
+		}
+	})
+
+	anim_tl
+		//.to(scene.rotation, { y: 4.79 })
+		//.to(scene.rotation, { y: 10 })
+		.to(camera.position, { y: 5})
+	//.to(model.position,{y: 0})
+
 // Controls
-	const controls = new OrbitControls(camera, canvas)
-	controls.enableDamping = true
+// 	const controls = new OrbitControls(camera, canvas)
+// 	controls.enableDamping = true
 
 	/**
 	 * Renderer
 	 */
-	const renderer = new THREE.WebGLRenderer({
-		canvas: canvas
-	})
+	const renderer = new THREE.WebGLRenderer({ antialias: true, canvas: canvas })
 	renderer.setSize(sizes.width, sizes.height)
-	renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-	const pmremGenerator = new THREE.PMREMGenerator( renderer )
-	scene.background = new THREE.Color( 0xbfe3dd )
-	scene.environment = pmremGenerator.fromScene( new RoomEnvironment(), 0.04 ).texture
+	renderer.setPixelRatio(window.devicePixelRatio)
+	renderer.outputEncoding = THREE.sRGBEncoding
+	renderer.shadowMap.enabled = true
 	/**
 	 * Animate
 	 */
 	const clock = new THREE.Clock()
 
-	let previosTime = 0
+	let previousTime = 0
 
 	const tick = () => {
 		const elapsedTime = clock.getElapsedTime()
-		const deltaTime = elapsedTime - previosTime
-		previosTime = elapsedTime
+		const deltaTime = elapsedTime - previousTime
+		previousTime = elapsedTime
 
 		if(mixer !== null) {
 			mixer.update(deltaTime)
 		}
 
 		// Update controls
-		controls.update()
+		//controls.update()
+		if(model) {
+			//model.position.y = floatY
+			anim_tl
+				//.to(scene.rotation, { y: 4.79 })
+				// .to(scene.position, { y: 2 })
+				//.to(camera.position, { y: 10 })
+				// .to(camera.fov, { y: 45 })
+				//.to(model.position,{y: 0})
+
+		}
+
 
 		// Render
+		camera.position.x += (mouseX - camera.position.x) * .05
+		//camera.position.y += (-mouseY - camera.position.y) * .05
+		camera.lookAt(scene.position)
 		renderer.render(scene, camera)
+
 
 		// Call tick again on the next frame
 		window.requestAnimationFrame(tick)

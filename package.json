@@ -63,7 +63,7 @@
   "dependencies": {
     "dat.gui": "^0.7.9",
     "gsap": "^3.11.4",
-    "three": "^0.148.0",
+    "three": "^0.134.0",
     "vanilla-lazyload": "^17.8.1",
     "vue": "^3.2.33"
   }
